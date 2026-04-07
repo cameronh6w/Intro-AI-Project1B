@@ -16,17 +16,28 @@ def create_preset_graph():
 
     #collect latitude and longittude in this array  as  we  parse  csv
     lat_lon =  []
+    
+    #based on data
+    min_lat=  38.9253  
+    min_lon=  -94.716 
+    max_lat=  39.3054
+    max_lon= -94.5177
+
     with open('assets/kc_landmarks_nodes-1.csv', mode='r') as file:
         reader = csv.reader(file)
         next(reader) #skip  first line
-    
-        for row in reader:
-            this_node = [row[0],float(row[3]),  float(row[4])]
-            lat_lon.append(this_node)
-            
-            #create node
-            G.add_node(row[0], label=row[2])
 
+        for row in reader:
+            x = (float(row[4])-min_lon)*1000
+            y = -(float(row[3])-min_lat)*1000
+            
+            # each line has [node id, lat, lon, adjusted x, adjusted y]
+            this_node = [row[0],float(row[3]),  float(row[4]), round(x,3), round(y,3)]
+            lat_lon.append(this_node)
+
+           
+            #create node
+            G.add_node(row[0], label=row[3])
 
     with open('assets/kc_landmarks_edges-1.csv', mode='r') as file:
         reader = csv.reader(file)
@@ -49,8 +60,24 @@ def create_preset_graph():
 
     adj_matrix = nx.to_numpy_array(G)
 
-    return G
+    return lat_lon
 
+
+def get_edges():
+    edges = []
+    with open('assets/kc_landmarks_edges-1.csv', mode='r') as file:
+        reader = csv.reader(file)
+        next(reader) #skip first  line 
+        
+        for row in reader: 
+            this_edge = [row[0], row[1]]
+            edges.append(this_edge)
+
+    return edges
+
+
+
+         
 # code is from google search ai, prompt ="how to generate a random networkx graph based on branching factor and weight distribution"
 def create_random_graph(num_nodes,  b_factor, weight_distribution):
 
@@ -202,6 +229,4 @@ def visualize_graph(G):
     plt.show()
 
 
-G = create_random_graph(10,2,[1,10])
-visualize_graph(G)
 
