@@ -10,7 +10,7 @@ import random
 
 
 
-def create_preset_graph():
+def get_preset_graph_lat_lon():
 
     G = nx.Graph() 
 
@@ -63,6 +63,61 @@ def create_preset_graph():
     return lat_lon
 
 
+
+def create_preset_graph():
+
+    G = nx.Graph() 
+
+    #collect latitude and longittude in this array  as  we  parse  csv
+    lat_lon =  []
+    
+    #based on data
+    min_lat=  38.9253  
+    min_lon=  -94.716 
+    max_lat=  39.3054
+    max_lon= -94.5177
+
+    with open('assets/kc_landmarks_nodes-1.csv', mode='r') as file:
+        reader = csv.reader(file)
+        next(reader) #skip  first line
+
+        for row in reader:
+            x = (float(row[4])-min_lon)*1000
+            y = -(float(row[3])-min_lat)*1000
+            
+            # each line has [node id, lat, lon, adjusted x, adjusted y]
+            this_node = [row[0],float(row[3]),  float(row[4]), round(x,3), round(y,3)]
+            lat_lon.append(this_node)
+
+           
+            #create node
+            #G.add_node(row[0], label=row[3])
+            G.add_node(row[0])
+
+    with open('assets/kc_landmarks_edges-1.csv', mode='r') as file:
+        reader = csv.reader(file)
+        next(reader) #skip first  line 
+        
+        for row in reader: 
+            start = int(row[0])
+            end = int(row[1])
+            
+            lat1 = lat_lon[start-1][1]
+            lon1 = lat_lon[start-1][2]
+
+            lat2 = lat_lon[end-1][1]
+            lon2 = lat_lon[end-1][2]
+
+            distance = haversine(lat1, lon1, lat2, lon2)
+    
+            #create edge
+            G.add_edge(row[0], row[1], weight =  round(distance, 3))
+
+    adj_matrix = nx.to_numpy_array(G)
+
+    return G
+
+
 def get_edges():
     edges = []
     with open('assets/kc_landmarks_edges-1.csv', mode='r') as file:
@@ -86,12 +141,14 @@ def create_random_graph(num_nodes,  b_factor, weight_distribution):
     p = b_factor / (num_nodes - 1)
     
     # 2. Generate Random Graph (Erdos-Renyi)
-    G = nx.fast_gnp_random_graph(num_nodes, p, directed=True)
+    G = nx.fast_gnp_random_graph(num_nodes, p, directed=False)
+
     
     # 3. Assign Weights
     for (u, v) in G.edges():
         # Option A: Uniform Distribution
         G.edges[u, v]['weight'] = round(random.uniform(weight_distribution[0], weight_distribution[1]),3)
+       
         # Option B: Gaussian Distribution (comment out A if using this)
         # G.edges[u, v]['weight'] = max(0, random.gauss(0.5, 0.1))
 

@@ -3,8 +3,32 @@ import graphing
 import networkx as nx
 import random
 
-def draw_preset_graph(screen):
-    lat_lon = graphing.create_preset_graph()
+#dont use this 
+def run_visual_search(screen, order):
+    clock = pygame.time.Clock()
+    visited = []
+
+    for node in order:
+        visited.append(node)
+
+        # Handle quitting so window doesn't freeze
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Clear and redraw
+        screen.fill("white")
+        draw_preset_graph(screen, visited)
+
+        pygame.display.update()
+
+        # Control speed (VERY IMPORTANT)
+        clock.tick(2)  # try 2–10 for speed
+
+
+def draw_preset_graph(screen, visited = []):
+    lat_lon = graphing.get_preset_graph_lat_lon()
 
     edges = graphing.get_edges()
 
@@ -23,7 +47,10 @@ def draw_preset_graph(screen):
         x= node[3]+300
         y = node[4]+600
 
-        pygame.draw.circle(screen, "Blue", (x,y), 7)
+        if node[0] in visited:
+            pygame.draw.circle(screen, "Red", (x,y), 7)
+        else:
+            pygame.draw.circle(screen, "Blue", (x,y), 7)
         
         node_t = pygame.font.Font(None, 7).render(node[0], True, "White")
         node_r = node_t.get_rect(center=(x,y))
@@ -41,14 +68,19 @@ def get_random_graph_pos(G):
         nodes_with_pos.append(this_node) 
     return nodes_with_pos 
 
-def draw_random_graph(screen):   
-    G= graphing.create_random_graph(10,2,[1,10]) 
+
+
+def draw_random_graph(screen, G,nodes_with_pos, visited = []):  
     
-    nodes_with_pos = get_random_graph_pos(G)
+    #nodes_with_pos = get_random_graph_pos(G)
     for n in nodes_with_pos:
         x = n[1]
         y = n[2]
-        pygame.draw.circle(screen, "Blue", (x,y), 7)
+        #pygame.draw.circle(screen, "Blue", (x,y), 7)
+        if str(n[0]) in visited or n[0] in visited:
+            pygame.draw.circle(screen, "Red", (x,y), 7)
+        else:
+            pygame.draw.circle(screen, "Blue", (x,y), 7)
 
     edges = list(G.edges)
     

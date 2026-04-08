@@ -7,6 +7,7 @@ import graphing
 import networkx as nx
 import random
 import drawing
+import algorythms
 
 pygame.init()
 
@@ -20,7 +21,8 @@ pygame.display.set_caption("Menu")
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
-def results():
+def results(stats):
+    print(stats)
     while True:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill("white")
@@ -45,6 +47,27 @@ def results():
         pygame.display.update()
 
 def graph_visual(is_random):
+    global clock
+    clock = pygame.time.Clock()
+
+    node_positions =[] 
+    if(is_random):
+        random.seed(seed)
+        G = graphing.create_random_graph(10,2,[1,10]) 
+        node_positions = drawing.get_random_graph_pos(G)
+    else:
+        G = graphing.create_preset_graph()
+        node_positions = None
+
+    global playing 
+    playing = False
+    order = []
+    step_index = 0
+    visited = []
+
+    frame_counter= 0
+    animation_delay = 5  # lower = faster
+
     while True:
         v_mouse_pos = pygame.mouse.get_pos()
         screen.fill("white")
@@ -82,18 +105,6 @@ def graph_visual(is_random):
         #rectangle for sections
         graph_rect = (160, 170, 640, 450) 
         pygame.draw.rect(screen, "Black", graph_rect, width=1)
-
-
-
-        #-------------------------
-        if(is_random):
-            random.seed(seed)
-            drawing.draw_random_graph(screen)
-        else:
-            drawing.draw_preset_graph(screen)
-
-
-        #-------------------------
          
         settings_rect = (800, 170, 320, 450) 
         pygame.draw.rect(screen, "Black", settings_rect, width=1)
@@ -115,8 +126,29 @@ def graph_visual(is_random):
         speed_rect = speed_text.get_rect(topleft=(807, 585))
         screen.blit(speed_text, speed_rect)
 
+        #from ai 
+        frame_counter += 1
+        
+        if playing and frame_counter % animation_delay == 0:
+            
+            if step_index < len(order):
+                visited.append(order[step_index])
+                print(visited)
+                step_index += 1
+            else:
+                playing = False
+        
         #event handling
+        
+        if is_random:
+            drawing.draw_random_graph(screen, G, node_positions, visited)
+        else:
+            drawing.draw_preset_graph(screen, visited)
+
+        
+          
         for event in pygame.event.get():
+            
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -124,10 +156,31 @@ def graph_visual(is_random):
                 if v_back_button.checkForInput(v_mouse_pos):
                     main_menu()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if play_button.checkForInput(v_mouse_pos):
+                    print("PLAY CLICKED")
+                    if is_random:
+                        order = algorythms.run_BFS(G, 4, 5)[0]
+                    else:
+                        order = algorythms.run_BFS(G, '20', '50')[0]
+
+                    print("ORDER:", order)
+                    playing = True
+                    visited = []
+                    step_index = 0
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if v_next_button.checkForInput(v_mouse_pos):
-                    results()
+                    #run all selected algs, give them  to restults 
+                    stats = []
+                    if(is_random):
+                        stats = algorythms.run_BFS(G,1,5)
+                    else:
+                        stats = algorythms.run_BFS(G,'1','50')
+                    results(stats)
+            
 
         pygame.display.update()
+        clock.tick(60) 
+        
 
 def random_settings_graph():
     while True:
