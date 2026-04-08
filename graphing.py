@@ -37,7 +37,7 @@ def get_preset_graph_lat_lon():
 
            
             #create node
-            G.add_node(row[0], label=row[3])
+            G.add_node(row[0], label=row[2])
 
     with open('assets/kc_landmarks_edges-1.csv', mode='r') as file:
         reader = csv.reader(file)
@@ -92,7 +92,7 @@ def create_preset_graph():
            
             #create node
             #G.add_node(row[0], label=row[3])
-            G.add_node(row[0])
+            G.add_node(row[0], label=row[2])
 
     with open('assets/kc_landmarks_edges-1.csv', mode='r') as file:
         reader = csv.reader(file)

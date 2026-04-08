@@ -24,9 +24,7 @@ def run_BFS(G, start, end):
     visible = queue.Queue()
     #   start order at the starting spot
     order.append(current)
-    
-    
-
+  
 
     #Add the starting position's nearest nodes to the graph before the loop begins
     children = G.neighbors(current)
@@ -37,6 +35,7 @@ def run_BFS(G, start, end):
 
         #stats
         order.append(i)
+   
         branching_factor =  branching_factor+1
     branching_factor_list.append(branching_factor)
     branching_factor = 0
@@ -53,11 +52,8 @@ def run_BFS(G, start, end):
             A.add_edge(current, end)
             
             order.append(end)
-            
-
-            
-
-            
+           
+               
             #clear queue
             while not visible.empty():
                 visible.get()
@@ -78,6 +74,7 @@ def run_BFS(G, start, end):
             
             if(i not in order):
                 order.append(i)
+              
                 
                 
 
@@ -100,11 +97,66 @@ def run_BFS(G, start, end):
 
 
 
+def run_DFS(G, start, end):
 
+    # Graph of what the agent has "seen"
+    A = nx.Graph()
+    A.add_node(start)
 
+    order = []
 
-def run_DFS():
-    print("DFS")
+    branching_factor = 0
+    branching_factor_list = []
+
+    # Stack instead of queue
+    stack = []
+    visited = set()
+
+    # Start
+    stack.append(start)
+    visited.add(start)
+    order.append(start)
+
+    while stack:
+        current = stack.pop()
+
+        # If goal found, stop
+        if current == end:
+            break
+
+        children = list(G.neighbors(current))
+        branching_factor = 0
+
+        for neighbor in children:
+            # Build visible graph A
+            A.add_node(neighbor)
+            A.add_edge(current, neighbor)
+
+            if neighbor not in visited:
+                stack.append(neighbor)
+                visited.add(neighbor)
+                order.append(neighbor)
+                branching_factor += 1
+
+        branching_factor_list.append(branching_factor)
+
+    # --- Shortest path on discovered graph ---
+    shortest_path = nx.shortest_path(A, source=start, target=end, weight='weight')
+    shortest_path_cost = nx.shortest_path_length(A, source=start, target=end, weight='weight')
+    shortest_path_depth = len(shortest_path) - 1
+
+    # --- Stats ---
+    if len(branching_factor_list) > 0:
+        max_b_fact = max(branching_factor_list)
+        avg_b_fact = sum(branching_factor_list) / len(branching_factor_list)
+    else:
+        max_b_fact = 0
+        avg_b_fact = 0
+
+    stats = [order, shortest_path, shortest_path_cost, shortest_path_depth, max_b_fact, avg_b_fact]
+
+    return stats
+
 
 def run_IDDFS():
     print("IDDFS")

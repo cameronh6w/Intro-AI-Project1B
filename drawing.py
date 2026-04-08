@@ -32,27 +32,29 @@ def draw_preset_graph(screen, visited = []):
 
     edges = graphing.get_edges()
 
+    
     for edge in edges:
-
+       
         start_node = int(edge[0])-1
         end_node =  int(edge[1])-1
+
         start_x= lat_lon[start_node][3]+300
         start_y = lat_lon[start_node][4]+600
         end_x= lat_lon[end_node][3]+300
         end_y = lat_lon[end_node][4]+600
 
         pygame.draw.line(screen, "Black", (start_x, start_y), (end_x,end_y), 2)
-
+   
     for node in lat_lon:
         x= node[3]+300
         y = node[4]+600
 
         if node[0] in visited:
-            pygame.draw.circle(screen, "Red", (x,y), 7)
+            pygame.draw.circle(screen, "Red", (x,y), 10)
         else:
-            pygame.draw.circle(screen, "Blue", (x,y), 7)
+            pygame.draw.circle(screen, "Blue", (x,y), 10)
         
-        node_t = pygame.font.Font(None, 7).render(node[0], True, "White")
+        node_t = pygame.font.Font(None, 20).render(node[0], True, "White")
         node_r = node_t.get_rect(center=(x,y))
         screen.blit(node_t, node_r)
     
@@ -71,22 +73,14 @@ def get_random_graph_pos(G):
 
 
 def draw_random_graph(screen, G,nodes_with_pos, visited = []):  
-    
-    #nodes_with_pos = get_random_graph_pos(G)
-    for n in nodes_with_pos:
-        x = n[1]
-        y = n[2]
-        #pygame.draw.circle(screen, "Blue", (x,y), 7)
-        if str(n[0]) in visited or n[0] in visited:
-            pygame.draw.circle(screen, "Red", (x,y), 7)
-        else:
-            pygame.draw.circle(screen, "Blue", (x,y), 7)
-
     edges = list(G.edges)
     
+
     for edge in edges:
-        start_node = int(edge[0])-1
-        end_node =  int(edge[1])-1
+        
+        start_node = int(edge[0])
+        end_node =  int(edge[1])
+
 
         start_x= nodes_with_pos[start_node][1]
         start_y = nodes_with_pos[start_node][2]
@@ -96,5 +90,21 @@ def draw_random_graph(screen, G,nodes_with_pos, visited = []):
         
 
         pygame.draw.line(screen, "Black", (start_x, start_y), (end_x,end_y), 2)
+    
+    #nodes_with_pos = get_random_graph_pos(G)
+    for n in nodes_with_pos:
+        x = n[1]
+        y = n[2]
+        #pygame.draw.circle(screen, "Blue", (x,y), 10)
+        if str(n[0]) in visited or n[0] in visited:
+            pygame.draw.circle(screen, "Red", (x,y), 10)
+        else:
+            pygame.draw.circle(screen, "Blue", (x,y), 10)
+
+        node_t = pygame.font.Font(None, 20).render(str(n[0]), True, "White")
+        node_r = node_t.get_rect(center=(x,y))
+        screen.blit(node_t, node_r)
+
+    
           
 

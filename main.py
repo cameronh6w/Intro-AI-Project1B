@@ -26,8 +26,15 @@ pygame.display.set_caption("Menu")
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("assets/font.ttf", size)
 
-def results(stats):
+def results(stats, is_random = False, settings = []):
     print(stats)
+
+    shortest_path = str(stats[1])
+    shortest_path_cost = str(stats[2])
+    shortest_path_depth= str(stats[3])
+    max_b_fact =  str(stats[4])
+    avg_b_fact = str(stats[5])
+
     while True:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill("white")
@@ -36,6 +43,28 @@ def results(stats):
         r_title_text = get_font(50).render("Results", True, "#b68f40")
         r_title_rect = r_title_text.get_rect(center=(640, 100))
         screen.blit(r_title_text, r_title_rect)
+        
+        #results text
+        sp_text = get_font(20).render("Shortest Path: "+shortest_path, True, "#000000")
+        sp_rect = sp_text.get_rect(topleft=(200, 180))
+        screen.blit(sp_text, sp_rect)
+
+        c_text = get_font(20).render("Cost: "+shortest_path_cost+" km", True, "#000000")
+        c_rect = c_text.get_rect(topleft=(200, 250))
+        screen.blit(c_text, c_rect)
+
+        d_text = get_font(20).render("Depth: "+ shortest_path_depth, True, "#000000")
+        d_rect = d_text.get_rect(topleft=(200, 320))
+        screen.blit(d_text, d_rect)
+
+        mb_text = get_font(20).render("Max Branching Factor: "+max_b_fact, True, "#000000")
+        mb_rect = mb_text.get_rect(topleft=(200, 390))
+        screen.blit(mb_text, mb_rect)
+
+        ab_text = get_font(20).render("Avg Branching Factor: "+avg_b_fact, True, "#000000")
+        ab_rect = ab_text.get_rect(topleft=(200, 460))
+        screen.blit(ab_text, ab_rect)
+
 
         #buttons
         r_back_button = Button(image=None, pos=(640, 660),text_input="Back", font=get_font(20), base_color="Black", hovering_color="Blue")
@@ -48,7 +77,7 @@ def results(stats):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if r_back_button.checkForInput(mouse_pos):
-                    main_menu()
+                    graph_visual(is_random, settings)
         pygame.display.update()
 
 def graph_visual(is_random = False, settings = []):
@@ -56,13 +85,19 @@ def graph_visual(is_random = False, settings = []):
     clock = pygame.time.Clock()
 
     node_positions =[] 
+    node_options= []
+    node_val = []
     if(is_random):
         random.seed(seed)
         G = graphing.create_random_graph(settings[0],settings[1],[settings[2],settings[3]]) 
         node_positions = drawing.get_random_graph_pos(G)
+        node_options =  [str(n) for n in G.nodes]
+        node_val = list(G.nodes)
     else:
         G = graphing.create_preset_graph()
         node_positions = None
+        node_options = [data['label'] for node, data in G.nodes(data=True)]
+        node_val = [int(n) for n in G.nodes]
 
     global playing 
     playing = False
@@ -73,15 +108,21 @@ def graph_visual(is_random = False, settings = []):
     frame_counter= 0
     animation_delay = 5  # lower = faster
 
-    dropdown = Dropdown(
-        screen, 120, 10, 100, 50, name='Select Color',
-        choices=[
-            'Red',
-            'Blue',
-            'Yellow',
-        ],
-        borderRadius=3, colour=pygame.Color('green'), values=[1, 2, 'true'], direction='down', textHAlign='left'
+   
+
+    #print(node_options)
+    dropdown_start = Dropdown(
+        screen, 807, 210, 250, 25, name='Select Start Node', fontSize=20,
+        choices= node_options,values =node_val,
+        borderRadius=1, colour=pygame.Color('grey'), direction='down', textHAlign='left'
         )
+    
+    dropdown_end = Dropdown(
+        screen, 807, 280, 250, 25, name='Select End Node', fontSize=20,
+        choices= node_options,values =node_val,
+        borderRadius=1, colour=pygame.Color('grey'), direction='down', textHAlign='left'
+        )
+    widgets = [dropdown_start,dropdown_end]
 
 
     while True:
@@ -171,14 +212,20 @@ def graph_visual(is_random = False, settings = []):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if v_back_button.checkForInput(v_mouse_pos):
+                    hide_widgets(widgets)
                     main_menu()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play_button.checkForInput(v_mouse_pos):
                     print("PLAY CLICKED")
+                    start = dropdown_start.getSelected()
+                    end = dropdown_end.getSelected()
+                    
                     if is_random:
-                        order = algorythms.run_BFS(G, 4, 5)[0]
+                        if(start != None and end != None):
+                            order = algorythms.run_DFS(G, int(start), int(end))[0]
                     else:
-                        order = algorythms.run_BFS(G, '20', '50')[0]
+                        if(start != None and end != None):
+                            order = algorythms.run_DFS(G, str(start), str(end))[0]
 
                     print("ORDER:", order)
                     playing = True
@@ -189,10 +236,15 @@ def graph_visual(is_random = False, settings = []):
                     #run all selected algs, give them  to restults 
                     stats = []
                     if(is_random):
-                        stats = algorythms.run_BFS(G,1,5)
+                        if(start != None and end != None):
+                            stats = algorythms.run_DFS(G, int(start), int(end))
+                        
                     else:
-                        stats = algorythms.run_BFS(G,'1','50')
-                    results(stats)
+                        if(start != None and end != None):
+                            stats = algorythms.run_DFS(G, str(start), str(end))
+
+                    hide_widgets(widgets)
+                    results(stats, is_random, settings)
             
 
         events = pygame.event.get()
@@ -222,6 +274,7 @@ def random_settings_graph():
     dist_range_output = TextBox(screen, 740, 310, 30, 40,colour ="#ffffff", borderColour="#ffffff", fontSize=25)
     dist_range_output.disable()  # Act as label instead of textbox
 
+    widgets = [nodes_slider,nodes_output,b_fact_slider,b_fact_output,dist_min_slider,dist_min_output,dist_range_slider,dist_range_output]
 
     while True:
         r_mouse_pos = pygame.mouse.get_pos()
@@ -291,11 +344,16 @@ def random_settings_graph():
                 if r_next_button.checkForInput(r_mouse_pos):
                     random_settings = [nodes_slider.getValue(),b_fact_slider.getValue(),dist_min_slider.getValue(),dist_range_slider.getValue()+dist_min_slider.getValue()]
                     print(random_settings)
+                    hide_widgets(widgets)
                     graph_visual(True,random_settings)
 
+
                 if grid_settings_button.checkForInput(r_mouse_pos):
+                    hide_widgets(widgets)
                     random_settings_grid()
+                
                 if graph_settings_button.checkForInput(r_mouse_pos):
+
                     random_settings_graph()
                 if seed_button.checkForInput(r_mouse_pos):
                     global seed
@@ -311,6 +369,10 @@ def random_settings_graph():
         
         pygame_widgets.update(events)
         pygame.display.update()
+
+def hide_widgets(widgets):
+    for w in widgets:
+        w.hide()
 
 def random_settings_grid():
     while True:
