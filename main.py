@@ -8,6 +8,11 @@ import networkx as nx
 import random
 import drawing
 import algorythms
+import pygame_widgets
+from pygame_widgets.slider import Slider
+from pygame_widgets.textbox import TextBox
+
+from pygame_widgets.dropdown import Dropdown
 
 pygame.init()
 
@@ -46,14 +51,14 @@ def results(stats):
                     main_menu()
         pygame.display.update()
 
-def graph_visual(is_random):
+def graph_visual(is_random = False, settings = []):
     global clock
     clock = pygame.time.Clock()
 
     node_positions =[] 
     if(is_random):
         random.seed(seed)
-        G = graphing.create_random_graph(10,2,[1,10]) 
+        G = graphing.create_random_graph(settings[0],settings[1],[settings[2],settings[3]]) 
         node_positions = drawing.get_random_graph_pos(G)
     else:
         G = graphing.create_preset_graph()
@@ -68,7 +73,19 @@ def graph_visual(is_random):
     frame_counter= 0
     animation_delay = 5  # lower = faster
 
+    dropdown = Dropdown(
+        screen, 120, 10, 100, 50, name='Select Color',
+        choices=[
+            'Red',
+            'Blue',
+            'Yellow',
+        ],
+        borderRadius=3, colour=pygame.Color('green'), values=[1, 2, 'true'], direction='down', textHAlign='left'
+        )
+
+
     while True:
+        
         v_mouse_pos = pygame.mouse.get_pos()
         screen.fill("white")
 
@@ -178,11 +195,34 @@ def graph_visual(is_random):
                     results(stats)
             
 
+        events = pygame.event.get()
+        pygame_widgets.update(events)
+        
         pygame.display.update()
         clock.tick(60) 
         
 
 def random_settings_graph():
+    screen.fill("white")
+    nodes_slider = Slider(screen, 620, 215, 400, 20, min=2, max=30, colour="#b68f40", initial=2, step=1)
+    nodes_output = TextBox(screen, 525, 205, 60, 40, fontSize=25)
+    nodes_output.disable()  # Act as label instead of textbox
+    nodes_slider.setValue(2)
+    
+
+    b_fact_slider = Slider(screen, 620, 265, 400, 20, min=1, max=10, colour="#b68f40", initial=1, step=1)
+    b_fact_output = TextBox(screen, 525, 255, 60, 40, fontSize=25)
+    b_fact_output.disable()  # Act as label instead of textbox
+
+    dist_min_slider = Slider(screen, 620, 365, 400, 20, min=1, max=10, colour="#b68f40", initial=1, step=1)
+    dist_min_output = TextBox(screen, 690, 310, 60, 40, colour ="#ffffff", borderColour="#ffffff", fontSize=25)
+    dist_min_output.disable()  # Act as label instead of textbox
+
+    dist_range_slider = Slider(screen, 620, 415, 400, 20, min=1, max=10, colour="#b68f40", initial=1, step=1)
+    dist_range_output = TextBox(screen, 740, 310, 30, 40,colour ="#ffffff", borderColour="#ffffff", fontSize=25)
+    dist_range_output.disable()  # Act as label instead of textbox
+
+
     while True:
         r_mouse_pos = pygame.mouse.get_pos()
         screen.fill("white")
@@ -229,10 +269,19 @@ def random_settings_graph():
         b_factor_rect = b_factor_text.get_rect(center=(356, 280))
         screen.blit(b_factor_text, b_factor_rect)
 
-        e_weight_text = get_font(20).render("Edge Weight Distribution: ", True, "#b68f40")
-        e_weight_rect = e_weight_text.get_rect(center=(435, 330))
+        e_weight_text = get_font(20).render("Edge Weight Distribution:[    ] ", True, "#b68f40")
+        e_weight_rect = e_weight_text.get_rect(topleft=(176, 320))
         screen.blit(e_weight_text, e_weight_rect)
-       
+
+        min_weight_text = get_font(20).render("Minimum:", True, "#b68f40")
+        min_weight_rect = min_weight_text.get_rect(center=(400, 380))
+        screen.blit(min_weight_text, min_weight_rect)
+
+        range_weight_text = get_font(20).render("Range: ", True, "#b68f40")
+        range_weight_rect = range_weight_text.get_rect(center=(400, 430))
+        screen.blit(range_weight_text, range_weight_rect)
+
+        
         #event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -240,7 +289,10 @@ def random_settings_graph():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if r_next_button.checkForInput(r_mouse_pos):
-                    graph_visual(True)
+                    random_settings = [nodes_slider.getValue(),b_fact_slider.getValue(),dist_min_slider.getValue(),dist_range_slider.getValue()+dist_min_slider.getValue()]
+                    print(random_settings)
+                    graph_visual(True,random_settings)
+
                 if grid_settings_button.checkForInput(r_mouse_pos):
                     random_settings_grid()
                 if graph_settings_button.checkForInput(r_mouse_pos):
@@ -249,6 +301,15 @@ def random_settings_graph():
                     global seed
                     seed = random.randint(1, 10)
 
+        events = pygame.event.get()
+        #screen.fill("white")
+        nodes_output.setText(nodes_slider.getValue())
+        b_fact_output.setText(b_fact_slider.getValue())
+        dist_min_output.setText(dist_min_slider.getValue())
+        dist_range_output.setText(dist_range_slider.getValue()+dist_min_slider.getValue())
+       
+        
+        pygame_widgets.update(events)
         pygame.display.update()
 
 def random_settings_grid():
