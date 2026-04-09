@@ -29,11 +29,21 @@ def get_font(size): # Returns Press-Start-2P in the desired size
 def results(stats, is_random = False, settings = []):
     print(stats)
 
-    shortest_path = str(stats[1])
-    shortest_path_cost = str(stats[2])
-    shortest_path_depth= str(stats[3])
-    max_b_fact =  str(stats[4])
-    avg_b_fact = str(stats[5])
+    search = stats[1]
+
+    shortest_path_found = str(stats[2])
+    shortest_path_cost_found= str(stats[3])
+
+    shortest_path_actual = str(stats[4])
+    shortest_path_cost_actual = str(stats[5])
+    
+    shortest_path_depth= str(stats[6])
+    max_b_fact = str(stats[7])  
+    avg_b_fact = str(stats[8])
+    nodes_expanded = str(stats[9]) 
+
+    nodes_generated= str(stats[10])
+
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
@@ -45,25 +55,47 @@ def results(stats, is_random = False, settings = []):
         screen.blit(r_title_text, r_title_rect)
         
         #results text
-        sp_text = get_font(20).render("Shortest Path: "+shortest_path, True, "#000000")
-        sp_rect = sp_text.get_rect(topleft=(200, 180))
+        sa_text = get_font(20).render("Search Algorythm: "+search, True, "#000000")
+        sa_rect = sa_text.get_rect(topleft=(100, 180))
+        screen.blit(sa_text, sa_rect)
+
+        sp_text = get_font(20).render("Shortest Path Found:  ", True, "#000000")
+        sp_rect = sp_text.get_rect(topleft=(100, 210))
         screen.blit(sp_text, sp_rect)
 
-        c_text = get_font(20).render("Cost: "+shortest_path_cost+" km", True, "#000000")
-        c_rect = c_text.get_rect(topleft=(200, 250))
+        text = "    "+shortest_path_found+" - Cost: "+shortest_path_cost_found+" km"
+        sp_text1 = get_font(20).render(text, True, "#b68f40")
+        sp_rect1 = sp_text1.get_rect(topleft=(100, 240))
+        screen.blit(sp_text1, sp_rect1)
+        
+        c_text = get_font(20).render("Actual Shortest Path: ", True, "#000000")
+        c_rect = c_text.get_rect(topleft=(100, 270))
         screen.blit(c_text, c_rect)
 
+        text = "    "+shortest_path_actual+" - Cost: "+shortest_path_cost_actual+" km"
+        c_text1 = get_font(20).render(text, True, "#b68f40")
+        c_rect1 = c_text1.get_rect(topleft=(100, 300))
+        screen.blit(c_text1, c_rect1)
+
         d_text = get_font(20).render("Depth: "+ shortest_path_depth, True, "#000000")
-        d_rect = d_text.get_rect(topleft=(200, 320))
+        d_rect = d_text.get_rect(topleft=(100, 330))
         screen.blit(d_text, d_rect)
 
         mb_text = get_font(20).render("Max Branching Factor: "+max_b_fact, True, "#000000")
-        mb_rect = mb_text.get_rect(topleft=(200, 390))
+        mb_rect = mb_text.get_rect(topleft=(100, 360))
         screen.blit(mb_text, mb_rect)
 
         ab_text = get_font(20).render("Avg Branching Factor: "+avg_b_fact, True, "#000000")
-        ab_rect = ab_text.get_rect(topleft=(200, 460))
+        ab_rect = ab_text.get_rect(topleft=(100, 390))
         screen.blit(ab_text, ab_rect)
+
+        ne_text = get_font(20).render("Nodes Expanded: "+nodes_expanded, True, "#000000")
+        ne_rect = ne_text.get_rect(topleft=(100, 420))
+        screen.blit(ne_text, ne_rect)
+
+        ng_text = get_font(20).render("Nodes Generated: "+nodes_generated, True, "#000000")
+        ng_rect = ng_text.get_rect(topleft=(100, 450))
+        screen.blit(ng_text, ng_rect)
 
 
         #buttons
@@ -80,9 +112,73 @@ def results(stats, is_random = False, settings = []):
                     graph_visual(is_random, settings)
         pygame.display.update()
 
+def get_order_from_search(is_random, search, G,start,end):
+    order = []
+    if is_random:
+        if(start != None and end != None):
+            if search ==1:
+                order = algorythms.run_BFS(G, int(start), int(end))[0]
+            if search ==2:
+                order = algorythms.run_DFS(G, int(start), int(end))[0]
+            if search ==3:
+                order = algorythms.run_IDDFS(G, int(start), int(end))[0]
+            if search ==4:
+                order = algorythms.run_Greedy(G, int(start), int(end))[0]
+            if search ==5:
+                order = algorythms.run_Astar(G, int(start), int(end))[0]
+    else:
+        if(start != None and end != None):
+            if search ==1:
+                order = algorythms.run_BFS(G, str(start), str(end))[0]
+            if search ==2:
+                order = algorythms.run_DFS(G,str(start), str(end))[0]
+            if search ==3:
+                order = algorythms.run_IDDFS(G, str(start), str(end))[0]
+            if search ==4:
+                order = algorythms.run_Greedy(G, str(start), str(end))[0]
+            if search ==5:
+                order = algorythms.run_Astar(G, str(start), str(end))[0]
+
+    return order
+
+
+def get_stats_from_search(is_random, search, G,start,end):
+
+    stats = []
+                
+    if is_random:
+        if(start != None and end != None):
+            if search ==1:
+                stats = algorythms.run_BFS(G, int(start), int(end))
+            if search ==2:
+                stats = algorythms.run_DFS(G, int(start), int(end))
+            if search ==3:
+                stats = algorythms.run_IDDFS(G, int(start), int(end))
+            if search ==4:
+                stats = algorythms.run_Greedy(G, int(start), int(end))
+            if search ==5:
+                stats = algorythms.run_Astar(G, int(start), int(end))
+    else:
+        if(start != None and end != None):
+            if search ==1:
+                stats = algorythms.run_BFS(G, str(start), str(end))
+            if search ==2:
+                stats = algorythms.run_DFS(G,str(start), str(end))
+            if search ==3:
+                stats = algorythms.run_IDDFS(G, str(start), str(end))
+            if search ==4:
+                stats = algorythms.run_Greedy(G, str(start), str(end))
+            if search ==5:
+                stats = algorythms.run_Astar(G, str(start), str(end))
+
+    return stats
+
 def graph_visual(is_random = False, settings = []):
     global clock
     clock = pygame.time.Clock()
+
+    global search 
+    search = 1 #1-BFS 2-DFS 3-IDDFS 4-Gredy 5-Astar
 
     node_positions =[] 
     node_options= []
@@ -144,6 +240,27 @@ def graph_visual(is_random = False, settings = []):
         v_next_button.changeColor(v_mouse_pos)
         v_next_button.update(screen)
 
+        BFS_button = Button(image=None, pos=(832, 360),text_input="BFS", font=get_font(15), base_color="Black", hovering_color="Blue")
+        BFS_button.changeColor(v_mouse_pos)
+        BFS_button.update(screen)
+
+        DFS_button = Button(image=None, pos=(890, 360),text_input="DFS", font=get_font(15), base_color="Black", hovering_color="Blue")
+        DFS_button.changeColor(v_mouse_pos)
+        DFS_button.update(screen)
+
+        IDDFS_button = Button(image=None, pos=(960, 360),text_input="IDDFS", font=get_font(15), base_color="Black", hovering_color="Blue")
+        IDDFS_button.changeColor(v_mouse_pos)
+        IDDFS_button.update(screen)
+
+        Greedy_button = Button(image=None, pos=(1050, 360),text_input="Greedy", font=get_font(15), base_color="Black", hovering_color="Blue")
+        Greedy_button.changeColor(v_mouse_pos)
+        Greedy_button.update(screen)
+
+
+        Astar_button = Button(image=None, pos=(1120, 360),text_input="A*", font=get_font(15), base_color="Black", hovering_color="Blue")
+        Astar_button.changeColor(v_mouse_pos)
+        Astar_button.update(screen)
+
         play_button = Button(image=None, pos=(852, 400),text_input="Play", font=get_font(20), base_color="Black", hovering_color="Blue")
         play_button.changeColor(v_mouse_pos)
         play_button.update(screen)
@@ -159,6 +276,8 @@ def graph_visual(is_random = False, settings = []):
         reset_button = Button(image=None, pos=(859, 550),text_input="Reset", font=get_font(20), base_color="Black", hovering_color="Blue")
         reset_button.changeColor(v_mouse_pos)
         reset_button.update(screen)
+
+        
 
         #rectangle for sections
         graph_rect = (160, 170, 640, 450) 
@@ -214,35 +333,31 @@ def graph_visual(is_random = False, settings = []):
                 if v_back_button.checkForInput(v_mouse_pos):
                     hide_widgets(widgets)
                     main_menu()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+                if BFS_button.checkForInput(v_mouse_pos):
+                    search = 1
+                if DFS_button.checkForInput(v_mouse_pos):
+                    search = 2
+                if IDDFS_button.checkForInput(v_mouse_pos):
+                    search = 3
+                if Greedy_button.checkForInput(v_mouse_pos):
+                    search = 4
+                if Astar_button.checkForInput(v_mouse_pos):
+                    search = 5
                 if play_button.checkForInput(v_mouse_pos):
                     print("PLAY CLICKED")
                     start = dropdown_start.getSelected()
                     end = dropdown_end.getSelected()
                     
-                    if is_random:
-                        if(start != None and end != None):
-                            order = algorythms.run_DFS(G, int(start), int(end))[0]
-                    else:
-                        if(start != None and end != None):
-                            order = algorythms.run_DFS(G, str(start), str(end))[0]
+                    order = get_order_from_search(is_random, search, G,start,end)
 
                     print("ORDER:", order)
                     playing = True
                     visited = []
                     step_index = 0
-            if event.type == pygame.MOUSEBUTTONDOWN:
                 if v_next_button.checkForInput(v_mouse_pos):
                     #run all selected algs, give them  to restults 
-                    stats = []
-                    if(is_random):
-                        if(start != None and end != None):
-                            stats = algorythms.run_DFS(G, int(start), int(end))
-                        
-                    else:
-                        if(start != None and end != None):
-                            stats = algorythms.run_DFS(G, str(start), str(end))
-
+                    stats = get_stats_from_search(is_random, search, G,start,end)
+                    
                     hide_widgets(widgets)
                     results(stats, is_random, settings)
             

@@ -54,6 +54,7 @@ def get_preset_graph_lat_lon():
             lon2 = lat_lon[end-1][2]
 
             distance = haversine(lat1, lon1, lat2, lon2)
+          
     
             #create edge
             G.add_edge(row[0], row[1], weight =  round(distance, 3))

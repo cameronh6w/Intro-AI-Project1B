@@ -1,1 +1,1 @@
-python3 -u "/Users/cameroncianciolo/Documents/GitHub/Intro-AI-Project1B/main.py"
+ython3 -u "/Users/cameroncianciolo/Documents/GitHub/Intro-AI-Project1B/algorythms.py"
